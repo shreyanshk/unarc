@@ -164,13 +164,6 @@ unsigned GetMaxMemToAlloc (void)
   return block.size - 5*mb;
 }
 
-unsigned GetAvailablePhysicalMemory (void)
-{
-  MEMORYSTATUS buf;
-    GlobalMemoryStatus (&buf);
-  return buf.dwAvailPhys;
-}
-
 int GetProcessorsCount (void)
 {
   SYSTEM_INFO si;
@@ -229,13 +222,22 @@ DWORD RegistryDeleteTree(HKEY hStartKey, LPTSTR pKeyName)
 
 
 #include <unistd.h>
-#include <sys/sysinfo.h>
+#include <sys/sysctl.h>
 
-unsigned GetPhysicalMemory (void)
-{
-  struct sysinfo si;
-    sysinfo(&si);
-  return si.totalram*si.mem_unit;
+unsigned long long GetPhysicalMemory() {
+    int mib[2];
+    mib[0] = CTL_HW;
+    mib[1] = HW_MEMSIZE; // HW_MEMSIZE gives total physical memory in bytes
+
+    unsigned long long physical_memory;
+    size_t length = sizeof(physical_memory);
+
+    if (sysctl(mib, 2, &physical_memory, &length, NULL, 0) == -1) {
+        perror("sysctl");
+        return 0;
+    }
+
+    return physical_memory;
 }
 
 unsigned GetMaxMemToAlloc (void)
@@ -245,16 +247,21 @@ unsigned GetMaxMemToAlloc (void)
   return UINT_MAX;
 }
 
-unsigned GetAvailablePhysicalMemory (void)
-{
-  struct sysinfo si;
-    sysinfo(&si);
-  return si.freeram*si.mem_unit;
-}
-
 int GetProcessorsCount (void)
 {
-  return get_nprocs();
+    int mib[2];
+    mib[0] = CTL_HW;
+    mib[1] = HW_NCPU; // HW_NCPU gives the number of logical CPUs
+
+    unsigned num_processors;
+    size_t length = sizeof(num_processors);
+
+    if (sysctl(mib, 2, &num_processors, &length, NULL, 0) == -1) {
+        perror("sysctl");
+        return 0; // Return 0 in case of an error
+    }
+
+    return num_processors;
 }
 
 #endif // Windows/Unix

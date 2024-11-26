@@ -1,4 +1,4 @@
-CXX=g++
+CXX=clang++
 
 DEFINES  = -DFREEARC_UNIX -DFREEARC_INTEL_BYTE_ORDER -DFREEARC_64BIT
 
@@ -15,7 +15,7 @@ UNARC = ArcStructure.h ArcCommand.h ArcProcess.h
 CUI = CUI.h
 HEADERS =  Compression/Compression.h Compression/Common.h
 
-UNIX_LINK_FLAGS = -L$(LIBDIR) -lstdc++ -lrt -lpthread -s
+UNIX_LINK_FLAGS = -L$(LIBDIR) -lc++ -lpthread -s
 
 
 CODE_FLAGS  = -fno-exceptions -fno-rtti -Wall \
